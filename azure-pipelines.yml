@@ -12,7 +12,7 @@ steps:
 
     dockerComposeCommand: build
 
-  enabled: false
+  enabled: true
 
 - task: Docker@0
   displayName: 'Push a container image: Java'

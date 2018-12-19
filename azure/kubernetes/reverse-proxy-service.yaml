@@ -1,0 +1,11 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: reverse-proxy
+spec:
+  selector:
+    app: reverse-proxy
+  type: LoadBalancer
+  ports:
+  - port: 8080
+    targetPort: 80

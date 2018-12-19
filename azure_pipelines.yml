@@ -1,0 +1,118 @@
+resources:
+- repo: self
+queue:
+  name: Hosted Ubuntu 1604
+steps:
+- task: DockerCompose@0
+  displayName: 'Run a Docker Compose command'
+  inputs:
+    azureSubscription: 'Microsoft Azure Internal Consumption (a6ffda4d-a701-4f2a-ade4-1341d39a86c8)'
+
+    azureContainerRegistry: '{"loginServer":"rifielnorth.azurecr.io", "id" : "/subscriptions/a6ffda4d-a701-4f2a-ade4-1341d39a86c8/resourceGroups/01core/providers/Microsoft.ContainerRegistry/registries/rifielnorth"}'
+
+    dockerComposeCommand: build
+
+  enabled: false
+
+- task: Docker@0
+  displayName: 'Push a container image: Java'
+  inputs:
+    azureSubscription: 'Microsoft Azure Internal Consumption (a6ffda4d-a701-4f2a-ade4-1341d39a86c8)'
+
+    azureContainerRegistry: '{"loginServer":"rifielnorth.azurecr.io", "id" : "/subscriptions/a6ffda4d-a701-4f2a-ade4-1341d39a86c8/resourceGroups/01core/providers/Microsoft.ContainerRegistry/registries/rifielnorth"}'
+
+    action: 'Push an image'
+
+    imageName: rifielnorth.azurecr.io/mts/java
+
+    qualifyImageName: false
+
+    includeLatestTag: true
+
+  enabled: false
+
+- task: Docker@0
+  displayName: 'Push a container image: Angular'
+  inputs:
+    azureSubscription: 'Microsoft Azure Internal Consumption (a6ffda4d-a701-4f2a-ade4-1341d39a86c8)'
+
+    azureContainerRegistry: '{"loginServer":"rifielnorth.azurecr.io", "id" : "/subscriptions/a6ffda4d-a701-4f2a-ade4-1341d39a86c8/resourceGroups/01core/providers/Microsoft.ContainerRegistry/registries/rifielnorth"}'
+
+    action: 'Push an image'
+
+    imageName: rifielnorth.azurecr.io/mts/angular
+
+    qualifyImageName: false
+
+    includeLatestTag: true
+
+  enabled: false
+
+- task: Docker@0
+  displayName: 'Push a container image: Reverse Proxy'
+  inputs:
+    azureSubscription: 'Microsoft Azure Internal Consumption (a6ffda4d-a701-4f2a-ade4-1341d39a86c8)'
+
+    azureContainerRegistry: '{"loginServer":"rifielnorth.azurecr.io", "id" : "/subscriptions/a6ffda4d-a701-4f2a-ade4-1341d39a86c8/resourceGroups/01core/providers/Microsoft.ContainerRegistry/registries/rifielnorth"}'
+
+    action: 'Push an image'
+
+    imageName: 'rifielnorth.azurecr.io/mts/reverse-proxy'
+
+    qualifyImageName: false
+
+    includeLatestTag: true
+
+  enabled: false
+
+- task: HelmInstaller@0
+  displayName: 'Install Helm 2.9.1'
+  inputs:
+    kubectlVersion: 1.10.3
+
+    checkLatestKubectl: false
+
+  enabled: false
+
+- task: HelmDeploy@0
+  displayName: 'helm init --client-only'
+  inputs:
+    command: init
+
+    upgradeTiller: false
+
+    arguments: '--client-only'
+
+  enabled: false
+
+- task: HelmDeploy@0
+  displayName: 'helm package'
+  inputs:
+    command: package
+
+    save: false
+
+  enabled: false
+
+- task: CopyFiles@2
+  displayName: 'Copy Kubernetes files'
+  inputs:
+    SourceFolder: azure/kubernetes
+
+    Contents: '*.yaml'
+
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+
+- task: CopyFiles@2
+  displayName: 'Copy ARM files'
+  inputs:
+    SourceFolder: 'azure/arm-templates'
+
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/arm-templates'
+
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifacts: drop'
+
+

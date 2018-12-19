@@ -1,0 +1,10 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: java
+spec:
+  selector:
+    app: java
+  ports:
+  - port: 8080
+    targetPort: 8080
